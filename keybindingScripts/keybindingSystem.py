@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
 from collections import Counter
+
 # ========== 全局变量 ==========
 ClientSystem = clientApi.GetClientSystemCls()
 nameSpace = clientApi.GetEngineNamespace()
@@ -12,8 +13,8 @@ NativeScreenManager = clientApi.GetNativeScreenManagerCls()
 NativeScreenManager.instance().RegisterScreenProxy("settings.screen_world_controls_and_settings", "keybindingScripts.proxys.SettingScreenProxy.SettingScreenProxy")
 # ===========================
 
-def PushKeyBindingScreen():
-    clientApi.PushScreen("arris", "arrisKeyBinding")
+
+PushKeyBindingScreen = lambda: clientApi.PushScreen("arris", "arrisKeyBinding")
 
 class KeyBindingData(object):
     _instance = None

@@ -11,12 +11,16 @@ levelId = clientApi.GetLevelId()
 class keybindingUI(ScreenNode):
     def __init__(self, namespace, name, param):
         ScreenNode.__init__(self, namespace, name, param)
-        compFactory.CreateGame(levelId).SimulateTouchWithMouse(False)
         self.selectorIndex = 0 # 左侧选项当前选择索引
         self.nowSelectButton = None
         self.nowInputKeys = []
 
+    def Create(self):
+        # 进入PC操作模式
+        compFactory.CreateGame(levelId).SimulateTouchWithMouse(False)
+
     def KeyPressedEvent(self, pressedKeys):
+        # 键盘按键事件
         if not self.nowSelectButton:
             return
         if pressedKeys not in self.nowInputKeys:
@@ -25,8 +29,8 @@ class keybindingUI(ScreenNode):
         nowInputKeys = tuple(self.nowInputKeys)
         bindings.keys = nowInputKeys
         self.UpdateScreen(True)
-        modKeyBinding = keyBindingData.KeyMapping[self.selectorIndex]
         # 保存玩家设置
+        modKeyBinding = keyBindingData.KeyMapping[self.selectorIndex]
         data = compFactory.CreateConfigClient(levelId).GetConfigData(str(modKeyBinding.ModSpace) + str(modKeyBinding.ModName), True) or {}
         key = str(bindings.default_keys) + str(bindings.description)
         data[key] = nowInputKeys
@@ -34,6 +38,7 @@ class keybindingUI(ScreenNode):
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, "#arrisKeyBindingResetClick")
     def KeyBindingResetClick(self, args):
+        # 重置按键映射
         index = args["#collection_index"]
         modKeyBinding = keyBindingData.KeyMapping[self.selectorIndex]
         bindings = modKeyBinding.Bindings[index]
@@ -49,12 +54,7 @@ class keybindingUI(ScreenNode):
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, "#arrisKeyBindingLeftClick")
     def KeyBindingLeftClick(self, args):
-        path = args["ButtonPath"]
-        controlList = path.split("/")
-        newPath = ""
-        for controlName in controlList[1:]:
-            newPath += "/" + controlName
-
+        # 左键选择当前按键映射进行设置
         index = args["#collection_index"]
         modKeyBinding = keyBindingData.KeyMapping[self.selectorIndex]
         modName = modKeyBinding.ModName
@@ -63,7 +63,8 @@ class keybindingUI(ScreenNode):
         self.UpdateScreen(True)
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, "#arrisKeyBindingRightClick")
-    def KeyBindingRightClick(self, args):
+    def KeyBindingRightClick(self, _):
+        # 右键退出设置当前的按键映射
         self.nowSelectButton = None
         self.nowInputKeys = []
         self.UpdateScreen(True)
@@ -98,6 +99,7 @@ class keybindingUI(ScreenNode):
         if index >= len(modKeyBinding.Bindings):
             return ""
         keys = modKeyBinding.Bindings[index].keys
+
         # 拼接中文格式化按键
         for i, keyEnum in enumerate(keys):
             keyName = GetKeyBoardFormat(keyEnum)
@@ -105,14 +107,15 @@ class keybindingUI(ScreenNode):
             if i < len(keys) - 1:
                 formatText += " + "
 
-        conflictList = []
         # 检测按键冲突
+        conflictList = []
         for modKeyBindingCls in keyBindingData.KeyMapping:
             for binding in modKeyBindingCls.Bindings:
                 if binding.keys == keys:
                     conflictList.append((modKeyBindingCls.ModName, keys))
                 if len(conflictList) > 1:
                     formatText = "§c{}".format(formatText)
+
         # 设置选中样式
         if (modKeyBinding.ModName, modKeyBinding.Bindings[index]) == self.nowSelectButton:
             formatText = "§e> §2{}§e <".format(formatText)
@@ -121,6 +124,7 @@ class keybindingUI(ScreenNode):
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindBool, "arrisKeybindingGrid", "#key_binding.enabled")
     def SetKeybindingItemEnabled(self, index):
+        # 设置是否允许玩家进行修改
         modKeyBinding = keyBindingData.KeyMapping[self.selectorIndex]
         if index >= len(modKeyBinding.Bindings):
             return True
