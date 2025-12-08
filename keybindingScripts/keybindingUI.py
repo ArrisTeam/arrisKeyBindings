@@ -84,56 +84,61 @@ class keybindingUI(ScreenNode):
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindString, "arrisKeybindingGrid", "#keybinding.description")
     def SetKeybindingItemDescription(self, index):
-        modKeyBinding = self.keyBindingData[self.selectorIndex]
-        if index >= len(modKeyBinding.Bindings):
-            return ""
-        return modKeyBinding.Bindings[index].description
+        if self.selectorIndex < len(self.keyBindingData):
+            modKeyBinding = self.keyBindingData[self.selectorIndex]
+            if index >= len(modKeyBinding.Bindings):
+                return ""
+            return modKeyBinding.Bindings[index].description
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindString, "arrisKeybindingGrid", "#keybinding.keys")
     def SetKeybindingItemKeys(self, index):
-        modKeyBinding = self.keyBindingData[self.selectorIndex]
-        formatText = ""
-        if index >= len(modKeyBinding.Bindings):
-            return ""
-        keys = modKeyBinding.Bindings[index].keys
+        if self.selectorIndex < len(self.keyBindingData):
+            modKeyBinding = self.keyBindingData[self.selectorIndex]
+            formatText = ""
+            if index >= len(modKeyBinding.Bindings):
+                return ""
+            keys = modKeyBinding.Bindings[index].keys
 
-        # 拼接中文格式化按键
-        for i, keyEnum in enumerate(keys):
-            keyName = GetKeyBoardFormat(keyEnum)
-            formatText += keyName
-            if i < len(keys) - 1:
-                formatText += " + "
+            # 拼接中文格式化按键
+            for i, keyEnum in enumerate(keys):
+                keyName = GetKeyBoardFormat(keyEnum)
+                formatText += keyName
+                if i < len(keys) - 1:
+                    formatText += " + "
 
-        # 检测按键冲突
-        conflictList = []
-        for modKeyBindingCls in self.keyBindingData:
-            for binding in modKeyBindingCls.Bindings:
-                if binding.keys == keys:
-                    conflictList.append((modKeyBindingCls.ModName, keys))
-                if len(conflictList) > 1:
-                    formatText = "§c{}".format(formatText)
+            # 检测按键冲突
+            conflictList = []
+            for modKeyBindingCls in self.keyBindingData:
+                for binding in modKeyBindingCls.Bindings:
+                    if binding.keys == keys:
+                        conflictList.append((modKeyBindingCls.ModName, keys))
+                    if len(conflictList) > 1:
+                        formatText = "§c{}".format(formatText)
 
-        # 设置选中样式
-        if (modKeyBinding.ModName, modKeyBinding.Bindings[index]) == self.nowSelectButton:
-            formatText = "§e> §2{}§e <".format(formatText)
+            # 设置选中样式
+            if (modKeyBinding.ModName, modKeyBinding.Bindings[index]) == self.nowSelectButton:
+                formatText = "§e> §2{}§e <".format(formatText)
 
-        return formatText
+            return formatText
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindBool, "arrisKeybindingGrid", "#key_binding.enabled")
     def SetKeybindingItemEnabled(self, index):
-        # 设置是否允许玩家进行修改
-        modKeyBinding = self.keyBindingData[self.selectorIndex]
-        if index >= len(modKeyBinding.Bindings):
-            return True
-        return modKeyBinding.Bindings[index].allow_modify
+        if self.selectorIndex < len(self.keyBindingData):
+            # 设置是否允许玩家进行修改
+            modKeyBinding = self.keyBindingData[self.selectorIndex]
+            if index >= len(modKeyBinding.Bindings):
+                return True
+            return modKeyBinding.Bindings[index].allow_modify
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindString, "selectorStackGrid", "#selector.text")
     def SetSelectorItemName(self, index):
-        return self.keyBindingData[index].ModName
+        if index < len(self.keyBindingData):
+            return self.keyBindingData[index].ModName
 
     @ViewBinder.binding_collection(ViewBinder.BF_BindString, "selectorStackGrid", "#icon.texture")
     def SetSelectorItemIcon(self, index):
-        return self.keyBindingData[index].ModIconPath
+        if index < len(self.keyBindingData):
+            return self.keyBindingData[index].ModIconPath
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, "#CloseKeyBindingScreen")
     def CloseScreen(self, _):
